@@ -1,12 +1,18 @@
 from rest_framework import serializers
-from news.models import Article
+from news.models import Article, Journalist
 
 from datetime import datetime
 from datetime import date
 from django.utils.timesince import timesince
 
+class JournalistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Journalist
+        fileds = '__all__'
+
 class ArticleSerializer(serializers.ModelSerializer):
     time_since_pub = serializers.SerializerMethodField()
+    author = serializers.StringRelatedField()
     class Meta:
         model = Article
         fields = '__all__'
@@ -56,7 +62,7 @@ class ArticleDefaultSerializer(serializers.Serializer):
         instance.text = validated_data.get('text', instance.text)
         instance.city = validated_data.get('city', instance.city)
         instance.publication_date = validated_data.get('publication_date', instance.publication_date)
-        instance.active = validated_data.get('active', instance.activate)
+        instance.activate = validated_data.get('activate', instance.activate)
         instance.save()
         return instance
     

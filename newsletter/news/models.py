@@ -16,7 +16,7 @@ class Article(models.Model):
     text = models.TextField()
     city = models.CharField(max_length=120)
     publication_date = models.DateField()
-    active = models.BooleanField(default=True)
+    activate = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
