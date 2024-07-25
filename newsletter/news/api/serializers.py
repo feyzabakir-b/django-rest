@@ -1,7 +1,39 @@
 from rest_framework import serializers
 from news.models import Article
 
-class ArticleSerializer(serializers.Serializer):
+from datetime import datetime
+from datetime import date
+from django.utils.timesince import timesince
+
+class ArticleSerializer(serializers.ModelSerializer):
+    time_since_pub = serializers.SerializerMethodField()
+    class Meta:
+        model = Article
+        fields = '__all__'
+        # fields = ['author', 'title', 'text']
+        # exclude = ['author', 'title', 'text']
+        read_only_fields = ['id', ' created_at', 'updated_at']
+
+    def get_time_since_pub(self,object):
+        now = datetime.now()
+        pub_date=object.publication_date
+        if object.activate == True:
+            time_delta=timesince(pub_date, now)
+            return time_delta
+        else:
+            return 'Not active!'
+
+            
+    def validate_publication_date(self, date_value):
+        today = date.today()
+        if date_value > today:
+            raise serializers.ValidationError('The publication date cannot be a later date.')
+        return date_value
+
+
+
+# standart serializers 
+class ArticleDefaultSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     author = serializers.CharField()
     title = serializers.CharField()
@@ -27,3 +59,13 @@ class ArticleSerializer(serializers.Serializer):
         instance.active = validated_data.get('active', instance.activate)
         instance.save()
         return instance
+    
+    def validate(self,data):
+        if data['title'] == data['description']:
+            raise serializers.ValidationError('Title and description fields cannot be the same. Please enter different.')
+        return data
+    
+    def validate_title(self, value):
+        if len(value) < 20:
+            raise serializers.ValidationError(f'The title field must be a minimum of 20 characters. You entered {value} characters.')
+        return value
